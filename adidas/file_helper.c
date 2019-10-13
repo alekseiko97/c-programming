@@ -20,7 +20,9 @@ int getNumberOfBytesInFile(char* filename)
     uint8_t c = 0;
     do 
     {
-        c = fgetc(fp);
+        c = fgetc(fp); // read every single char
+
+        // if reached the end of the file
         if (feof(fp))
         {
             break;
@@ -61,7 +63,7 @@ void readFileInBinary(char* filename, int bytesCounter, uint8_t output[])
 
 void writeToFile(uint8_t byteArray[], int size, const char filename[]) {
     FILE* fp;
-    fp = fopen(filename, "wb");
+    fp = fopen(filename, "wb"); // write in binary
 
     if (fp == NULL) {
         printf("Error while opening the file.\n");
@@ -75,13 +77,3 @@ void writeToFile(uint8_t byteArray[], int size, const char filename[]) {
     
     fclose(fp);
 }
-
-// 1. read the file (e.g. "Hello World") 
-// 2. convert text to bytes
-// 3. divide each byte into two nibbles (2 x 4-bits)
-// 4. take the first nibble (4-bits)
-// 5. add MSB (most significant bit) in front and 3 parity bits to the end
-// 6  do the same for the second nibble
-// 7. do 2 to 5 again
-// 8. write everything to the file
-
