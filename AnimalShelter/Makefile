@@ -6,7 +6,7 @@ CFLAGS=-Wall -Werror -Iproduct -I../Unity/-Itest/-Isrc
 SHARED=	product/administration.c
 	                         
 TEST=$(SHARED) \
-             ../Unity/src/unity.c 
+             test/unity.c 
 
 all: 
 	gcc $(CFLAGS) product/$(PN).c $(SHARED) -o $(PN) 

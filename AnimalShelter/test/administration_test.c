@@ -6,7 +6,7 @@ void setUp(void)
 {
     // This is run before EACH test
     // Shared variables
-    MAX_SIZE = 5;
+    // MAX_SIZE = 5;
     size = 0;
 }
 
@@ -24,6 +24,7 @@ void test_addAnimal()
     TEST_ASSERT_EQUAL(0, result);
 }
 
+// Assuming that the max size is 5
 void test_addToFullArray()
 {
     ANIMAL animalArray[MAX_SIZE];
@@ -31,13 +32,13 @@ void test_addToFullArray()
 
     ANIMAL animal1 = { "Rax", Dog, 12 };
 
-    addAnimal(&animal1, animalArray);
-    addAnimal(&animal1, animalArray);
-    addAnimal(&animal1, animalArray);
-    addAnimal(&animal1, animalArray);
-    addAnimal(&animal1, animalArray);
+    addAnimal(&animal1, animalArray); // 1
+    addAnimal(&animal1, animalArray); // 2
+    addAnimal(&animal1, animalArray); // 3
+    addAnimal(&animal1, animalArray); // 4
+    addAnimal(&animal1, animalArray); // 5
 
-    int toBeAdded = addAnimal(&animal1, animalArray);
+    int toBeAdded = addAnimal(&animal1, animalArray); // 6
     TEST_ASSERT_EQUAL(-1, toBeAdded);
 }
 

@@ -1,7 +1,6 @@
 /*
  * Menu animal_shelter.c
  *
- *
  */
 
 #include <stdio.h>
@@ -13,7 +12,6 @@
 int main (void)
 {
      printf ("PRC assignment 'Animal Shelter' (version april 2019)\n");
-     MAX_SIZE = 5;
      ANIMAL animalArray[MAX_SIZE];
      createDummyAnimals(animalArray);
 
@@ -50,7 +48,7 @@ int main (void)
 
                 // Enter name
                 printf ("Enter animal name: ");
-                char name[15]; 
+                char name[MaxNameLength]; 
                 scanf ("%s", name);
                 
                 // to <-- from

@@ -1,14 +1,45 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "file_helper.h"
 
-void readBytesFromFile(char file_name[])
+/*
+    This function counts and returns how many bytes are in the file
+*/
+
+int getNumberOfBytesInFile(char* filename)
 {
-    char ch;
-    FILE *fp;
-    int res;
+    FILE* fp;
+    fp = fopen(filename, "rb");
+    if (fp == NULL)
+    {
+        return -1;
+    }
 
-    fp = fopen(file_name, "r");  // read mode
+    int nrOfBytes = 0;
+    uint8_t c = 0;
+    do 
+    {
+        c = fgetc(fp);
+        if (feof(fp))
+        {
+            break;
+        }
+        nrOfBytes++;
+    } while (1);
+
+    return nrOfBytes;
+}
+
+/*
+    This function reads input file in binary mode and writes the content in output array
+*/
+
+void readFileInBinary(char* filename, int bytesCounter, uint8_t output[])
+{
+    FILE *fp;
+    uint8_t c;
+    fp = fopen(filename, "rb");  // read in binary mode
 
     if (fp == NULL)
     {
@@ -16,27 +47,41 @@ void readBytesFromFile(char file_name[])
         return;
     }
 
-    res = fread(&ch, sizeof(char), 1, fp);
-
-    uint8_t out[40];
-    uint8_t c = 0;
     int i = 0;
-
-    do {
+    while ( i < bytesCounter) {
+        //fread(buffer, sizeof(uint8_t), 1, fp);
         c = fgetc(fp);
-
-        if (feof(fp))
-        {
-            break;
-        }
-
-        res = fread(&ch, sizeof(char), 1, fp);
-        printf("%с is %u", ch, c);
-        out[i] = c;
+       // printf("%ui\n", c);
+        output[i] = c;
         i++;
-    } while (1);
+    }
 
-    printf("\n");
     fclose(fp);
-
 }
+
+void writeToFile(uint8_t byteArray[], int size, const char filename[]) {
+    FILE* fp;
+    fp = fopen(filename, "wb");
+
+    if (fp == NULL) {
+        printf("Error while opening the file.\n");
+        return;
+    }
+
+    int i;
+    for (i = 0; i < size; i++) {
+        fwrite(&byteArray[i], sizeof(byteArray[0]), 1, fp);
+    }
+    
+    fclose(fp);
+}
+
+// 1. read the file (e.g. "Hello World") 
+// 2. convert text to bytes
+// 3. divide each byte into two nibbles (2 x 4-bits)
+// 4. take the first nibble (4-bits)
+// 5. add MSB (most significant bit) in front and 3 parity bits to the end
+// 6  do the same for the second nibble
+// 7. do 2 to 5 again
+// 8. write everything to the file
+

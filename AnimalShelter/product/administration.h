@@ -3,7 +3,6 @@
 
 #include "animal.h"
 
-int MAX_SIZE;
 int size; // current size
 
 // specify your own functions
