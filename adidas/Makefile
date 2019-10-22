@@ -1,8 +1,7 @@
 CFLAGS=-Wall -Werror -Iproduct
 
 #add your own other c files here
-SHARED=	file_helper.c\
-		binary_helper.c
+SHARED=binary_helper.c
 	                         
 all: 
 	gcc $(CFLAGS) encode.c $(SHARED) -o encode 

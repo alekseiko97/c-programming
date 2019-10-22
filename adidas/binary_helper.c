@@ -12,33 +12,27 @@
     and the last three (least significant) are reserved for parity bits (will be added later)
 */
 
-void splitIntoNibbles(uint8_t byteArray[], uint8_t out[], int size) {
+void splitIntoNibbles(uint8_t byte, uint8_t out[]) {
+    uint8_t highNibble = byte & 0xF0; // clean second part
+    uint8_t lowNibble = (byte & 0x0F) << 4; // clean first part and shift to to the left 
 
-    int i;
-    for (i = 0; i < size; i++) {
-        uint8_t highNibble = byteArray[i] & 0xF0; // clean second part
-        uint8_t lowNibble = (byteArray[i] & 0x0F) << 4; // clean first part and shift to to the left 
-
-        // twice bigger than the original array because we create 2 new bytes out of one
-        int index = i * 2; 
-        out[index] = highNibble;
-        out[index + 1] = lowNibble;
-    }
+    out[0] = highNibble;
+    out[1] = lowNibble;
 }
 
 /*
     In this function we calculate parity bits and add them to the given nibble
 */
 
-uint8_t addParityBits(uint8_t nibble) {
+void addParityBits(uint8_t *nibble) {
     
-    int data[4]; // 4 data bits
-    int parity[3]; // 3 parity bits
+    uint8_t data[4]; // 4 data bits
+    uint8_t parity[3]; // 3 parity bits
 
     int i;
     for (i = 0; i < 4; i++) {
         // get the individual bits at first 4 positions
-        data[i] = nibble & (1 << (i + 4)) ? 1 : 0; // (1101) 0000
+        data[i] = *nibble & (1 << (i + 4)) ? 1 : 0; // (1101) 0000
     }
 
     /*
@@ -67,50 +61,45 @@ uint8_t addParityBits(uint8_t nibble) {
    printf("-------------\n");
 
     // shift all bits to the right by one to have 1 zero byte in front
-   nibble >>= 1; 
+   *nibble >>= 1; 
 
     // add parity bits
     for (i = 0; i < 3; i++) {
-        nibble ^= (parity[i] << i); 
+        *nibble ^= (parity[i] << i); 
     }
 
-    printf("New byte: %ul\n", nibble);
-
-    return nibble; // new byte
+    printf("New byte: %ul\n", *nibble);
 }
 
 /*
     Used to flip one random bit in the provided byte
 */
-uint8_t flipBit(uint8_t byte) {
+void flipBit(uint8_t *byte) {
 
     int random = rand() % 6; 
     printf("Shifted by: %d\n", random);
 
     uint8_t mask = 1 << random;
-    byte ^= mask;
-    
-    return byte;
+    *byte ^= mask;
 }
 
-uint8_t decodeNibble(uint8_t nibble) {
+void decodeNibble(uint8_t *nibble) {
     uint8_t parity[3];
     uint8_t data[4];
 
     uint8_t p0, p1, p2; // circles
-    uint8_t decoded = 0; // holder for the decoded byte
 
     // byte structure: 0 (d3 d2 d1 d0) (p2 p1 p0)
 
     // extract data bits
     int i;
     for (i = 0; i < 4; i++) {
-        data[i] = nibble & ( 1 << (i + 3) ) ? 1 : 0;
+        data[i] = *nibble & ( 1 << (i + 3) ) ? 1 : 0;
     }
 
     // extract parity bits
     for (i = 0; i < 3; i++) {
-        parity[i] = nibble & ( 1 << i ) ? 1 : 0;
+        parity[i] = *nibble & ( 1 << i ) ? 1 : 0;
     }
 
     /*
@@ -127,24 +116,25 @@ uint8_t decodeNibble(uint8_t nibble) {
     bool p1_even = p1 % 2 == 0;
     bool p2_even = p2 % 2 == 0;
 
+    // check for data bits
     if (p0_even && p1_even && p2_even) {
         printf("\nOK. No corruption was detected in the given byte\n");
         printf("----------\n");
-        return nibble;
     } else if (!p0_even && !p1_even && p2_even) {
-        data[0] ^= 1;
+        *nibble ^= (1 << 3);
     } else if (!p0_even && !p1_even && !p2_even){
-        data[1] ^= 1;
+        *nibble ^= (1 << 4);
     } else if (!p0_even && p1_even && !p2_even) {
-        data[2] ^= 1;
+        *nibble ^= (1 << 5);
     } else if (p0_even && !p1_even && !p2_even) {
-        data[3] ^= 1;
+        *nibble ^= (1 << 6);
+        // check for parity bits
     } else if (!p0_even && p1_even && p2_even) {
-        parity[0] ^= 1;
+        *nibble ^= 1;
     } else if (p0_even && !p1_even && p2_even) {
-        parity[1] ^= 1;
+        *nibble ^= (1 << 1);
     } else if (p0_even && p1_even && !p2_even) {
-        parity[2] ^= 1;
+        *nibble ^= (1 << 2);
     }
 
     printf("\nFixed:\n");
@@ -152,18 +142,6 @@ uint8_t decodeNibble(uint8_t nibble) {
     printf("data[0]: %d, data[1]: %d, data[3]: %d, parity[1]: %d\n", data[0], data[1], data[3], parity[1]);
     printf("data[1]: %d, data[2]: %d, data[3]: %d, parity[2]: %d\n", data[1], data[2], data[3], parity[2]);
     printf("--------\n");
-
-    // add parity bits
-    for (i = 0; i < 3; i++) {
-        decoded ^= ( parity[i] << i ); 
-    }
-
-    // add data bits 
-    for (i = 0; i < 4; i++) {
-        decoded ^= ( data[i] << ( i + 3 ) );
-    }
-
-    return decoded;
 }
 
 /*
@@ -183,4 +161,18 @@ uint8_t mergeNibblesIntoByte(uint8_t MSB, uint8_t LSB) {
     new = MSB | LSB;
 
     return new;
+}
+
+void writeToFile(uint8_t byte, const char* filename) {
+    FILE* fp;
+    fp = fopen(filename, "a"); // write in binary
+
+    if (fp == NULL) {
+        printf("Error while writing to the file.\n");
+        return;
+    }
+
+    fwrite(&byte, sizeof(byte), 1, fp);
+    
+    fclose(fp);
 }

@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "file_helper.h"
 #include "binary_helper.h"
 
 int main(int argc, char **argv)
@@ -13,36 +12,37 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    /* 
-        Get input and output file names from arguments
-        and copy them to local variables
-    */
-    char input_filename[15];
-    strcpy (input_filename, argv[1]);
-    char output_filename[15];
-    strcpy (output_filename, argv[2]);
-    
-    // 1. read bytes from the input file
-    int byteCounter = getNumberOfBytesInFile(input_filename);
-    uint8_t originalByteArray[byteCounter];
-    readFileInBinary(input_filename, byteCounter, originalByteArray);
+    FILE *fp;
+    uint8_t byte;
+    fp = fopen(argv[1], "rb");  // read in binary mode
 
-    int i;
-    for (i = 0; i < byteCounter; i++) {
-        printf("Original byte: %ui\n", originalByteArray[i]);
+    if (fp == NULL)
+    {
+        printf("Error while opening the file.\n");
+        return -1;
     }
 
-    // 2. split bytes into nibbles and put them in array
-    uint8_t byteArray[byteCounter * 2]; // holder for nibbles
-    splitIntoNibbles(originalByteArray, byteArray, byteCounter);
+    int res = fread (&byte, 1, 1, fp);
 
-    // 3. assigning parity bits here
-    for (i = 0; i < byteCounter * 2; i++) {
-        byteArray[i] = addParityBits(byteArray[i]);
+    while ( res > 0 ) { // while there is something to read
+
+        printf("Original byte: %ui\n", byte);
+
+        uint8_t nibbles[2]; // nibbles will go here
+        splitIntoNibbles(byte, nibbles);
+
+        addParityBits(&nibbles[0]);
+        addParityBits(&nibbles[1]);
+
+        writeToFile(nibbles[0], argv[2]);
+        writeToFile(nibbles[1], argv[2]);
+
+        // read the next one
+        res = fread (&byte, 1, 1, fp);
     }
 
-    // 4. finally, we write newly created bytes to the output file
-    writeToFile(byteArray, byteCounter * 2, output_filename);
+    // close the stream
+    fclose(fp);
 
     return 0;
 }
