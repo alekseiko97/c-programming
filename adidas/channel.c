@@ -35,10 +35,7 @@ int main(int argc, char **argv)
 
         if (isFlipped == 1) { // true
             flipBit(&byte);
-            printf("Flipped\n");
             flipCounter++;
-        } else {
-            printf("Not flipped\n");
         } 
 
         writeToFile(byte, argv[2]);
@@ -47,7 +44,7 @@ int main(int argc, char **argv)
         res = fread (&byte, 1, 1, fp);
     }
 
-   // printf("Flipped %d times\n", flipCounter);
+    printf("Flipped %d times\n", flipCounter);
 
     // close the stream
     fclose(fp);
